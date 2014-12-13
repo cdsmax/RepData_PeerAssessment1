@@ -1,14 +1,10 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data 
 Load the data and also get a subset without missing values 
-```{r}
+
+```r
 library(plyr)
 
 data <- read.csv('activity.csv')
@@ -18,7 +14,8 @@ data_full <- data[complete.cases(data), ]
 
 ## What is mean total number of steps taken per day? 
 Histogram of the total number of steps taken each day 
-```{r}
+
+```r
 daily_steps <- ddply(data_full, .(date), summarize, steps = sum(steps))
 
 hist(
@@ -27,20 +24,33 @@ hist(
     main='Total Daily Steps'
   )
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
   
 The mean total number of steps taken per day 
-```{r}
+
+```r
 mean(daily_steps$steps)
+```
+
+```
+## [1] 10766.19
 ```
   
 The median total number of steps taken per day 
-```{r}
+
+```r
 median(daily_steps$steps)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern? 
 Time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis) 
-```{r}
+
+```r
 # avg steps for each interval from all days
 interval_steps <- ddply(data_full, .(interval), summarize, steps = mean(steps))
 
@@ -53,21 +63,35 @@ plot(
     main='Average Daily Activity Pattern'
   )
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
  
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps? 
-```{r}
+
+```r
 most_steps <- max(interval_steps$steps) # interval with most steps across all days
 interval_steps[interval_steps$steps == most_steps, ]
+```
+
+```
+##     interval    steps
+## 104      835 206.1698
 ```
  
 ## Imputing missing values 
 Total number of missing values in the data set: 
-```{r}
+
+```r
 sum(is.na(data))
+```
+
+```
+## [1] 2304
 ```
  
 Attempt to fill in all of the missing values in the dataset by setting NA to avg steps for that interval
-```{r}
+
+```r
 # rename the steps col for easy access after join
 colnames(interval_steps) <- c('interval', 'steps_avg')
 
@@ -80,7 +104,8 @@ data_imputed$steps[is.na(data_imputed$steps)] <- round(data_imputed$steps_avg[is
  
  
 Histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day 
-```{r}
+
+```r
 daily_steps_imputed <- ddply(data_imputed, .(date), summarize, steps = sum(steps))
 
 hist(
@@ -90,14 +115,26 @@ hist(
   )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+
 The mean total number of imputed steps taken per day 
-```{r}
+
+```r
 mean(daily_steps_imputed$steps)
 ```
 
+```
+## [1] 10765.64
+```
+
 The median total number of imputed steps taken per day 
-```{r}
+
+```r
 median(daily_steps_imputed$steps)
+```
+
+```
+## [1] 10762
 ```
 
 ### Conclusion about imputed data
@@ -110,7 +147,8 @@ This is due to a higher total number of steps in the imputed data, since NA valu
 Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.  
 
 Add weekend/weekday columns, and calculate mean steps for each 5-min interval on a weekend or a weekday
-```{r}
+
+```r
 # add day of the week to each obs.
 data_imputed$day_of_week <- weekdays(as.Date(data_imputed$date))
 
@@ -123,7 +161,8 @@ week_mean <- ddply(data_imputed, .(interval, part_of_week), summarize, steps=mea
   
   
 Plot the activity for weekend vs weekday
-```{r}
+
+```r
 # timeseries for weekend
 plot(
     week_mean[week_mean$part_of_week == 'weekend', 'interval'],
@@ -133,7 +172,11 @@ plot(
     ylab='Number of Steps',
     main='Average Daily Activity Pattern On Weekends'
   )
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-13-1.png) 
+
+```r
 # timeseries for weekday
 plot(
     week_mean[week_mean$part_of_week == 'weekday', 'interval'],
@@ -144,3 +187,5 @@ plot(
     main='Average Daily Activity Pattern On Weekdays'
   )
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-13-2.png) 
